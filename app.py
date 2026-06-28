@@ -214,6 +214,36 @@ selection = st.dataframe(
     selection_mode="single-row"
 )
 
-if selection and selection["rows"]:selected_row_index = selection["rows"][0]selected_node = df_globe.iloc[selected_row_index]# Extract row parametersv_score = selected_node["Vulnerability"]card_style = "alert-card" if v_score >= 50 else "alert-card-low"title_style = "card-title" if v_score >= 50 else "card-title-low"icon = "🚨" if v_score >= 50 else "🛡️"# Render the custom card HTML container wrapper blockst.markdown(f"""{icon} DETAILED TARGET INTELLIGENCE: {selected_node['Point ID']}{v_score}% Vulnerability{selected_node['Main Causes']}{selected_node['Precautions']}{selected_node['Suggestions']}""", unsafe_allow_html=True)
+if selection and selection.get("rows"):
+    selected_row_index = selection["rows"]
+    if len(selected_row_index) > 0:
+        selected_node = df_globe.iloc[selected_row_index[0]]
+        
+        # Extract row parameters
+        v_score = selected_node["Vulnerability"]
+        card_style = "alert-card" if v_score >= 50 else "alert-card-low"
+        title_style = "card-title" if v_score >= 50 else "card-title-low"
+        icon = "🚨" if v_score >= 50 else "🛡️"
+        
+        # Render the custom card HTML container wrapper block
+        st.markdown(f"""
+            <div class="{card_style}">
+                <div class="{title_style}">{icon} DETAILED TARGET INTELLIGENCE: {selected_node['Point ID']}</div>
+                <hr style="border: 0; border-top: 1px solid #232b35; margin: 10px 0;">
+                <div class="section-header">⚠️ Current Threat Rating</div>
+                <div style="font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 10px;">{v_score}% Vulnerability</div>
+                
+                <div class="section-header">🔥 Primary Systemic Causes</div>
+                <div style="color: #c5c6c7; font-size: 15px; margin-bottom: 10px;">{selected_node['Main Causes']}</div>
+                
+                <div class="section-header">🛑 Required Field Precautions</div>
+                <div style="color: #c5c6c7; font-size: 15px; margin-bottom: 10px;">{selected_node['Precautions']}</div>
+                
+                <div class="section-header">💡 Predictive Analytical Suggestions</div>
+                <div style="color: #c5c6c7; font-size: 15px;">{selected_node['Suggestions']}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("ℹ️ Select a telemetry row inside the inspector grid above to generate the specialized tactical response briefing card.")
 else:
-st.info("ℹ️ Select a telemetry row inside the inspector grid above to generate the specialized tactical response briefing card.")
+    st.info("ℹ️ Select a telemetry row inside the inspector grid above to generate the specialized tactical response briefing card.")
