@@ -206,7 +206,14 @@ with col_globe:
 st.markdown("### 📑 Multi-Modal Target Telemetry Inspector")
 st.caption("👉 Click on any row entry in the table below to open the stylish, advanced tactical alert popup card.")
 
-selection = st.dataframe(df_globe[["Point ID", "Status", "Vulnerability", "Local Temp", "Latitude", "Longitude"]],use_container_width=True,hide_index=True,on_select="rerun", # Forces application to execute instantly upon selection clickselection_mode="single-row")
+selection = st.dataframe(
+    df_globe[["Point ID", "Status", "Vulnerability", "Local Temp", "Latitude", "Longitude"]],
+    use_container_width=True,
+    hide_index=True,
+    on_select="rerun",
+    selection_mode="single-row"
+)
+
 if selection and selection["rows"]:selected_row_index = selection["rows"][0]selected_node = df_globe.iloc[selected_row_index]# Extract row parametersv_score = selected_node["Vulnerability"]card_style = "alert-card" if v_score >= 50 else "alert-card-low"title_style = "card-title" if v_score >= 50 else "card-title-low"icon = "🚨" if v_score >= 50 else "🛡️"# Render the custom card HTML container wrapper blockst.markdown(f"""{icon} DETAILED TARGET INTELLIGENCE: {selected_node['Point ID']}{v_score}% Vulnerability{selected_node['Main Causes']}{selected_node['Precautions']}{selected_node['Suggestions']}""", unsafe_allow_html=True)
 else:
 st.info("ℹ️ Select a telemetry row inside the inspector grid above to generate the specialized tactical response briefing card.")
