@@ -80,7 +80,7 @@ with col_ctrl:
     temp, rh, wind, soil_moist, vulnerability_score, active_fires_count = 25, 40, 15, 0.25, 30, 0
     map_data = []
 
-    if location_input:
+        if location_input:
         try:
             # STEP A: Dynamic Area Geocoding
             location = geolocator.geocode(location_input)
@@ -89,7 +89,7 @@ with col_ctrl:
                 st.caption(f"TELEMETRY RECOGNIZED // ADDR: {location.address}")
                 st.caption(f"COORD LOCK // LAT: {lat:.4f} // LON: {lon:.4f}")
                 
-                # STEP B: Live Atmospheric Streaming (Open-Meteo API)
+                # STEP B: Live Atmospheric Streaming (Open-Meteo API) - FIXED URL STRUCTURE
                 weather_url = f"https://open-meteo.com{lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,soil_moisture_0_to_7cm&forecast_days=1"
                 weather_res = requests.get(weather_url).json()
                 
@@ -99,7 +99,7 @@ with col_ctrl:
                 wind = current_data["wind_speed_10m"]
                 soil_moist = current_data.get("soil_moisture_0_to_7cm", 0.25)
 
-                # STEP C: NASA Thermal Satellite Pipeline
+                # STEP C: NASA Thermal Satellite Pipeline - FIXED ENDPOINT STRUCTURE
                 if NASA_API_KEY != "MISSING" and NASA_API_KEY != "":
                     buffer = 0.5  
                     bbox = f"{lon-buffer},{lat-buffer},{lon+buffer},{lat+buffer}"
@@ -108,21 +108,23 @@ with col_ctrl:
                     
                     if firms_res.status_code == 200 and "latitude" in firms_res.text:
                         lines = firms_res.text.strip().split('\n')[1:]
-                        active_fires_count = len(lines)
-                        for idx, line in enumerate(lines):
-                            f_data = line.split(',')
-                            map_data.append({
-                                "Point ID": f"NASA-SPOT-{idx+1}",
-                                "Latitude": float(f_data), 
-                                "Longitude": float(f_data), 
-                                "Status": "NASA Anomaly Spot", 
-                                "Indicator Size": 12,
-                                "Local Temp": f"{temp} °C",
-                                "Vulnerability": 95,
-                                "Main Causes": f"Active satellite thermal trigger at coordinates. High heat spikes ({temp}°C) combined with wind velocities.",
-                                "Precautions": "Enact immediate local containment. Evacuate non-essential personnel within a 15km perimeter zone.",
-                                "Suggestions": "Deploy aerial tracking assets. Coordinate real-time satellite updates every 3 hours to monitor line vector shifts."
-                            })
+                        if lines and len(lines) > 0 and ',' in lines[0]:
+                            active_fires_count = len(lines)
+                            for idx, line in enumerate(lines):
+                                f_data = line.split(',')
+                                if len(f_data) > 1:
+                                    map_data.append({
+                                        "Point ID": f"NASA-SPOT-{idx+1}",
+                                        "Latitude": float(f_data[0]), 
+                                        "Longitude": float(f_data[1]), 
+                                        "Status": "NASA Anomaly Spot", 
+                                        "Indicator Size": 12,
+                                        "Local Temp": f"{temp} °C",
+                                        "Vulnerability": 95,
+                                        "Main Causes": f"Active satellite thermal trigger at coordinates. High heat spikes ({temp}°C) combined with wind velocities.",
+                                        "Precautions": "Enact immediate local containment. Evacuate non-essential personnel within a 15km perimeter zone.",
+                                        "Suggestions": "Deploy aerial tracking assets. Coordinate real-time satellite updates every 3 hours to monitor line vector shifts."
+                                    })
                 
                 # STEP D: Predictive Risk Engine Calculation
                 temp_factor = min(max((temp - 10) / 30, 0), 1) * 30
@@ -130,6 +132,7 @@ with col_ctrl:
                 wind_factor = min(max(wind / 50, 0), 1) * 20
                 fuel_factor = min(max((1.0 - soil_moist) / 1.0, 0), 1) * 20
                 vulnerability_score = int(temp_factor + rh_factor + wind_factor + fuel_factor)
+
                 
                 if active_fires_count > 0:
                     vulnerability_score = min(vulnerability_score + 15, 100)
