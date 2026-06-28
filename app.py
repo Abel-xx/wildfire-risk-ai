@@ -79,7 +79,12 @@ with col_ctrl:
     lat, lon = -3.4653, -62.2159  
     temp, rh, wind, soil_moist, vulnerability_score, active_fires_count = 25, 40, 15, 0.25, 30, 0
     map_data = []
-    if location_input:
+        # Add an active trigger button right under your search input text
+    submit_button = st.button("🛰️ INITIALIZE ORBITAL SCAN")
+
+    # Change 'if location_input:' to wait for the button click
+    if location_input and submit_button:
+
         try:
             # STEP A: Dynamic Area Geocoding
             location = geolocator.geocode(location_input)
