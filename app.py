@@ -79,8 +79,7 @@ with col_ctrl:
     lat, lon = -3.4653, -62.2159  
     temp, rh, wind, soil_moist, vulnerability_score, active_fires_count = 25, 40, 15, 0.25, 30, 0
     map_data = []
-
-        if location_input:
+    if location_input:
         try:
             # STEP A: Dynamic Area Geocoding
             location = geolocator.geocode(location_input)
